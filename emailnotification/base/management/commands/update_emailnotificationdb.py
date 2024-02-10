@@ -22,7 +22,7 @@ class Command(BaseCommand):
         if clear_app_db:
             self.clearAppDB()
         else:
-            #self.syncDatabases()
+            self.syncDatabases()
             self.sendMails()
         
     def syncDatabases(self):
@@ -94,6 +94,7 @@ class Command(BaseCommand):
         print(f"Time elapsed syncing databases: {end-start} seconds.")
 
     def sendMails(self):
+        start = time.time()
         current_date = datetime.date.today()
         email_notifications = EmailNotification.objects.exclude(is_marked_as_closed=True).exclude(mail_sent=True)
         
@@ -103,12 +104,12 @@ class Command(BaseCommand):
                 subject = f"{email_notification.work_package_id} Numaralı İş Paketinin Teslim Tarihi Geçti!"
                 message = f"{email_notification.work_package_id} Numaralı iş pakedinin teslim tarihi geçmiş bulunmakta\n Durum iş pakedinin sorumlularına ve yaratıcısına bildirilmiştir."
                 sender = "OpenProject Management"
-                print(subject)
                 send_mail(subject, message, sender, recipient_list, fail_silently=False)
                 email_notification.mail_sent = True
                 email_notification.mail_sent_date = timezone.now()
                 email_notification.save()
-
+        end = time.time()
+        print(f"Time elapsed sending emails: {end-start} seconds.")
     def clearAppDB(self):
         EmailNotification.objects.all().delete()
         print("Successfully cleared the app database")
