@@ -101,6 +101,7 @@ class Command(BaseCommand):
         for email_notification in email_notifications:
             if current_date > email_notification.due_date:
                 recipient_list = list(set([email_notification.assignee_mail, email_notification.author_mail, email_notification.responsible_mail]))
+                recipient_list = [email_address for email_address in recipient_list if email_address is not None]
                 subject = f"{email_notification.work_package_id} Numaralı İş Paketinin Teslim Tarihi Geçti!"
                 message = f"{email_notification.work_package_id} Numaralı iş pakedinin teslim tarihi geçmiş bulunmakta\n Durum iş pakedinin sorumlularına ve yaratıcısına bildirilmiştir."
                 sender = "OpenProject Management"
