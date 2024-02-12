@@ -8,12 +8,13 @@ import datetime
 from django.utils import timezone
 import time
 from concurrent.futures import ThreadPoolExecutor
-
+import logging
 
 class Command(BaseCommand):
     
     help = 'This is a test command to see if it successfully adds a new row of data to the db'
     closed_status_id = 12
+    logger = logging.getLogger()
     
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('--clearappdb', action='store_true', help='Clear the application database')
@@ -95,23 +96,21 @@ class Command(BaseCommand):
                     email_notification.save()
 
         end = time.time()
-        print(f"Time elapsed syncing databases: {end-start} seconds.")
+        self.logger.info(f"Time elapsed syncing databases: {end-start} seconds.")
 
     def sendMails(self, no_threads):
         start = time.time()
         
         email_notifications = EmailNotification.objects.exclude(is_marked_as_closed=True).exclude(mail_sent=True)
         if no_threads:
-            print("NOT using multiple threads")
             for email_notification in email_notifications:
                 self.sendMailForOnePackage(email_notification)
         else:
-            print("using multiple threads")
             with ThreadPoolExecutor(max_workers=None) as executor:
                 executor.map(self.sendMailForOnePackage, email_notifications)
 
         end = time.time()
-        print(f"Time elapsed sending emails: {end-start} seconds.")
+        self.logger.info(f"Time elapsed sending emails: {end-start} seconds.")
 
     def sendMailForOnePackage(self, email_notification):
         current_date = datetime.date.today()
@@ -128,6 +127,6 @@ class Command(BaseCommand):
 
     def clearAppDB(self):
         EmailNotification.objects.all().delete()
-        print("Successfully cleared the app database")
+        self.logger.info("Successfully cleared the app database")
     
 
