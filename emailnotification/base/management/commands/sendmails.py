@@ -101,7 +101,6 @@ class Command(BaseCommand):
         start = time.time()
         
         email_notifications = EmailNotification.objects.exclude(is_marked_as_closed=True).exclude(mail_sent=True)
-        print(no_threads)
         if no_threads:
             print("NOT using multiple threads")
             for email_notification in email_notifications:
