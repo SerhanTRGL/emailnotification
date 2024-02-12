@@ -20,5 +20,5 @@ def debug_task(self):
     print(f'Request: {self.request!r}')
 
 @app.task(bind=True)
-def emailnotification_task(self):
-    call_command('update_emailnotificationdb')
+def sendemails_task(self):
+    call_command('sendmails')

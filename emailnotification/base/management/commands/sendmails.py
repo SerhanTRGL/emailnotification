@@ -7,6 +7,8 @@ from base.openprojectdb_models import Users
 import datetime
 from django.utils import timezone
 import time
+from concurrent.futures import ThreadPoolExecutor
+
 
 class Command(BaseCommand):
     
@@ -14,16 +16,18 @@ class Command(BaseCommand):
     closed_status_id = 12
     
     def add_arguments(self, parser: CommandParser) -> None:
-        parser.add_argument('--clearappdb', type=bool, help='Clear the application database')
+        parser.add_argument('--clearappdb', action='store_true', help='Clear the application database')
+        parser.add_argument('--nothreads', action='store_true', help='Send emails using multiple threads')
     
     def handle(self, *args, **options):
         clear_app_db = options['clearappdb']
+        no_threads = options['nothreads']
 
         if clear_app_db:
             self.clearAppDB()
         else:
             self.syncDatabases()
-            self.sendMails()
+            self.sendMails(no_threads)
         
     def syncDatabases(self):
         start = time.time()
@@ -93,13 +97,26 @@ class Command(BaseCommand):
         end = time.time()
         print(f"Time elapsed syncing databases: {end-start} seconds.")
 
-    def sendMails(self):
+    def sendMails(self, no_threads):
         start = time.time()
-        current_date = datetime.date.today()
-        email_notifications = EmailNotification.objects.exclude(is_marked_as_closed=True).exclude(mail_sent=True)
         
-        for email_notification in email_notifications:
-            if current_date > email_notification.due_date:
+        email_notifications = EmailNotification.objects.exclude(is_marked_as_closed=True).exclude(mail_sent=True)
+        print(no_threads)
+        if no_threads:
+            print("NOT using multiple threads")
+            for email_notification in email_notifications:
+                self.sendMailForOnePackage(email_notification)
+        else:
+            print("using multiple threads")
+            with ThreadPoolExecutor(max_workers=None) as executor:
+                executor.map(self.sendMailForOnePackage, email_notifications)
+
+        end = time.time()
+        print(f"Time elapsed sending emails: {end-start} seconds.")
+
+    def sendMailForOnePackage(self, email_notification):
+        current_date = datetime.date.today()
+        if current_date > email_notification.due_date:
                 recipient_list = list(set([email_notification.assignee_mail, email_notification.author_mail, email_notification.responsible_mail]))
                 recipient_list = [email_address for email_address in recipient_list if email_address is not None]
                 subject = f"{email_notification.work_package_id} Numaralı İş Paketinin Teslim Tarihi Geçti!"
@@ -109,8 +126,7 @@ class Command(BaseCommand):
                 email_notification.mail_sent = True
                 email_notification.mail_sent_date = timezone.now()
                 email_notification.save()
-        end = time.time()
-        print(f"Time elapsed sending emails: {end-start} seconds.")
+
     def clearAppDB(self):
         EmailNotification.objects.all().delete()
         print("Successfully cleared the app database")

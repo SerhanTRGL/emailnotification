@@ -3,4 +3,4 @@ from django.core.management import call_command
 
 @shared_task
 def sendmails():
-    call_command('update_emailnotificationsdb')
+    call_command('sendmails')
