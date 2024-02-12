@@ -103,7 +103,7 @@ class Command(BaseCommand):
                 recipient_list = list(set([email_notification.assignee_mail, email_notification.author_mail, email_notification.responsible_mail]))
                 recipient_list = [email_address for email_address in recipient_list if email_address is not None]
                 subject = f"{email_notification.work_package_id} Numaralı İş Paketinin Teslim Tarihi Geçti!"
-                message = f"{email_notification.work_package_id} Numaralı iş pakedinin teslim tarihi geçmiş bulunmakta\n Durum iş pakedinin sorumlularına ve yaratıcısına bildirilmiştir."
+                message = f"{email_notification.work_package_id} Numaralı iş paketinin teslim tarihi geçmiş bulunmakta\n Durum iş paketinin sorumlularına ve yaratıcısına bildirilmiştir."
                 sender = "OpenProject Management"
                 send_mail(subject, message, sender, recipient_list, fail_silently=False)
                 email_notification.mail_sent = True
