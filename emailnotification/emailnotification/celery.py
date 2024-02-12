@@ -1,6 +1,5 @@
 import os
 from celery import Celery
-from django.core.management import call_command
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emailnotification.settings')
 app = Celery('emailnotification')
@@ -18,7 +17,3 @@ app.autodiscover_tasks()
 @app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
-
-@app.task(bind=True)
-def sendemails_task(self):
-    call_command('sendmails')
