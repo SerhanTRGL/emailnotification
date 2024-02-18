@@ -1,10 +1,7 @@
-from django.core.mail import send_mail
 from django.db.models import Q
-from django.utils import timezone
 from base.models import EmailNotification
 from base.openprojectdb_models import WorkPackages
 from base.openprojectdb_models import Users
-from concurrent.futures import ThreadPoolExecutor
 import logging
 import datetime
 import time
@@ -12,7 +9,7 @@ import time
 closed_status_id = 12
 logger = logging.getLogger()
 
-def syncDatabases():
+def sync_databases():
     global closed_status_id
     global logger
 
@@ -82,37 +79,3 @@ def syncDatabases():
 
     end = time.time()
     logger.info(f"Time elapsed syncing databases: {end-start} seconds.")
-
-def sendMails(no_threads):
-    global logger
-
-    start = time.time()
-    email_notifications = EmailNotification.objects.exclude(is_marked_as_closed=True).exclude(mail_sent=True)
-
-    if no_threads:
-        for email_notification in email_notifications:
-            sendMailForOnePackage(email_notification)
-    else:
-        with ThreadPoolExecutor(max_workers=None) as executor:
-            executor.map(sendMailForOnePackage, email_notifications)
-
-    end = time.time()
-    logger.info(f"Time elapsed sending emails: {end-start} seconds.")
-
-def sendMailForOnePackage(email_notification):
-    current_date = datetime.date.today()
-    if current_date > email_notification.due_date:
-        recipient_list = list(set([email_notification.assignee_mail, email_notification.author_mail, email_notification.responsible_mail]))
-        recipient_list = [email_address for email_address in recipient_list if email_address is not None]
-        subject = f"{email_notification.work_package_id} Numaralı İş Paketinin Teslim Tarihi Geçti!"
-        message = f"{email_notification.work_package_id} Numaralı iş paketinin teslim tarihi geçmiş bulunmakta\n Durum iş paketinin sorumlularına ve yaratıcısına bildirilmiştir."
-        sender = "OpenProject Management"
-        send_mail(subject, message, sender, recipient_list, fail_silently=False)
-        email_notification.mail_sent = True
-        email_notification.mail_sent_date = timezone.now()
-        email_notification.save()
-
-def clearAppDB():
-    global logger
-    EmailNotification.objects.all().delete()
-    logger.info("Successfully cleared the app database")

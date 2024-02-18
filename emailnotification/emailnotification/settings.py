@@ -11,8 +11,14 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
+#Fernet
+FERNET_KEY = b'UuCC-mqNAODrHWDh4IjldYvFxMajKzQpMj0fyn_1VV8='
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -88,11 +94,11 @@ DATABASES = {
     },
     'openprojectdb' : {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'openproject_dev',
-        'USER': 'openproject_test',
-        'PASSWORD': 'openproject-dev-password',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.getenv('OPENPROJECT_DB_NAME'),
+        'USER': os.getenv('OPENPROJECT_DB_USER'),
+        'PASSWORD': (Fernet(FERNET_KEY).decrypt(os.getenv('OPENPROJECT_DB_PASSWORD'))).decode(),
+        'HOST': os.getenv('OPENPROJECT_DB_HOST'),
+        'PORT': os.getenv('OPENPROJECT_DB_PORT'),
     }
 }
 
@@ -140,9 +146,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#Fernet
-from cryptography.fernet import Fernet
-FERNET_KEY = b'M1ExUxs1hfpxsVRa1DMyy9RoRSzW5DQEATsSmcr80Bg='
 
 #SMTP settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -151,4 +154,4 @@ EMAIL_USE_TLS = False
 EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = Fernet(FERNET_KEY).decrypt(os.getenv('EMAIL_HOST_PASSWORD'))
+EMAIL_HOST_PASSWORD = (Fernet(FERNET_KEY).decrypt(os.getenv('EMAIL_HOST_PASSWORD'))).decode()
