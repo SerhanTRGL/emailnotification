@@ -6,7 +6,7 @@ import datetime
 closed_status_id = 12
 logger = logging.getLogger()
 
-def sendMailForOnePackage(email_notification):
+def send_mail_for_one_package(email_notification):
     current_date = datetime.date.today()
     if current_date > email_notification.due_date:
         recipient_list = list(set([email_notification.assignee_mail, email_notification.author_mail, email_notification.responsible_mail]))

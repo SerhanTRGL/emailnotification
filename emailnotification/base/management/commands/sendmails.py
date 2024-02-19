@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand, CommandParser
-import base.service
+from base.services.clear_app_db import clear_app_db
+from base.services.sync_databases import sync_databases
+from base.services.send_all_mails import send_all_mails 
 
 class Command(BaseCommand):
 
@@ -12,13 +14,13 @@ class Command(BaseCommand):
         parser.add_argument('--nothreads', action='store_true', help='Send emails using multiple threads')
     
     def handle(self, *args, **options):
-        clear_app_db = options['clearappdb']
+        can_clear_app_db = options['clearappdb']
         no_threads = options['nothreads']
 
-        if clear_app_db:
-            base.service.clearAppDB()
+        if can_clear_app_db:
+            clear_app_db()
         else:
-            base.service.syncDatabases()
-            base.service.sendMails(no_threads)
+            sync_databases()
+            send_all_mails(no_threads)
         
 
