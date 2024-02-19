@@ -1,6 +1,6 @@
 import logging
 import time
-from base.models import EmailNotification
+from base.models.EmailNotification import EmailNotification
 from concurrent.futures import ThreadPoolExecutor
 from base.services.send_mail_for_one_package import send_mail_for_one_package
 

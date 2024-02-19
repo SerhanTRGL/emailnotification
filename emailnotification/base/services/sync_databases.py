@@ -1,7 +1,7 @@
 from django.db.models import Q
-from base.models import EmailNotification
-from base.openprojectdb_models import WorkPackages
-from base.openprojectdb_models import Users
+from base.models.EmailNotification import EmailNotification
+from base.models.openprojectdb_models import WorkPackages
+from base.models.openprojectdb_models import Users
 import logging
 import datetime
 import time

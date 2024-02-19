@@ -1,5 +1,5 @@
 import logging
-from base.models import EmailNotification
+from base.models.EmailNotification import EmailNotification
 
 logger = logging.getLogger()
 

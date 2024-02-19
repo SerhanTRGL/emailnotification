@@ -12,4 +12,3 @@ class EmailNotification(models.Model):
 
     class Meta:
         app_label = 'base'
-        
