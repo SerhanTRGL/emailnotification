@@ -13,6 +13,7 @@ Django==4.2.10
 django-celery-beat==2.5.0
 django-timezone-field==6.1.0
 kombu==5.3.5
+packaging==23.2
 prompt-toolkit==3.0.43
 psycopg2-binary==2.9.9
 pycparser==2.21
